@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidFavorite(data) {
+      return data.userId is string && 
+             data.userId == request.auth.uid &&
+             data.itemId is number &&
+             data.mediaType in ['movie', 'tv'] &&
+             data.keys().hasAll(['userId', 'itemId', 'mediaType', 'addedAt']) &&
+             data.keys().size() <= 6;
+    }
+
+    function isValidComment(data) {
+      return data.userId is string && 
+             data.userId == request.auth.uid &&
+             data.itemId is number &&
+             data.text is string &&
+             data.text.size() <= 1000 &&
+             data.rating >= 0 &&
+             data.rating <= 10 &&
+             data.keys().hasAll(['userId', 'itemId', 'text', 'rating', 'createdAt']) &&
+             data.keys().size() <= 7;
+    }
+
+    // Favorites
+    match /favorites/{favoriteId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && isValidFavorite(request.resource.data);
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    // Comments
+    match /comments/{commentId} {
+      allow read: if true; // Publicly readable
+      allow list: if true;
+      allow create: if isSignedIn() && isValidComment(request.resource.data);
+      allow update: if isSignedIn() && isOwner(resource.data.userId) && isValidComment(request.resource.data) &&
+                      request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'rating', 'updatedAt']);
+      allow delete: if isSignedIn() && isOwner(resource.data.userId);
+    }
+
+    // Test connection
+    match /test/{testId} {
+      allow read: if true;
+    }
+
+    match /visitor_stats/{statId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    match /users/{userId} {
+      // Robust checks for user profile
+      allow get, list, create, update: if isSignedIn() && request.auth.uid == userId;
+
+      // Allow access to all subcollections (like /progress) for the owner
+      match /{document=**} {
+        allow read, write: if isSignedIn() && request.auth.uid == userId;
+      }
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "name": "CineStream",
+  "description": "Premium streaming experience for movies, series, and anime with high-quality playback and personalized watchlists.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

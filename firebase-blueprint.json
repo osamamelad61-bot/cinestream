@@ -1,0 +1,86 @@
+{
+  "entities": {
+    "Favorite": {
+      "title": "Favorite",
+      "description": "User's favorite movies and series",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "itemId": { "type": "number" },
+        "mediaType": { "type": "string", "enum": ["movie", "tv"] },
+        "title": { "type": "string" },
+        "posterPath": { "type": "string" },
+        "addedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "itemId", "mediaType"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "User comments and ratings for a movie",
+      "type": "object",
+      "properties": {
+        "itemId": { "type": "number" },
+        "userId": { "type": "string" },
+        "userName": { "type": "string" },
+        "userPhoto": { "type": "string" },
+        "text": { "type": "string" },
+        "rating": { "type": "number" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["itemId", "userId", "text", "rating"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "Extended user information including subscription and access",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "realDebridApiKey": { "type": "string" },
+        "subscriptionType": { "type": "string", "enum": ["none", "premium"] },
+        "plan": { "type": "string" },
+        "lastPaymentId": { "type": "string" },
+        "temporaryAccessUntil": { "type": "string", "format": "date-time" },
+        "timezone": { "type": "string" },
+        "country": { "type": "string" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "WatchingProgress": {
+      "title": "Watching Progress",
+      "description": "Tracking user progress for movies and series",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "type": { "type": "string", "enum": ["movie", "tv"] },
+        "title": { "type": "string" },
+        "posterPath": { "type": "string" },
+        "progress": { "type": "number" },
+        "season": { "type": "number" },
+        "episode": { "type": "number" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "type", "title", "progress"]
+    }
+  },
+  "firestore": {
+    "favorites": {
+      "schema": "Favorite",
+      "description": "Collection of user favorites"
+    },
+    "comments": {
+      "schema": "Comment",
+      "description": "Collection of user comments and ratings"
+    },
+    "users": {
+      "schema": "User",
+      "description": "Collection of user profile and subscription status"
+    },
+    "users/{userId}/progress": {
+      "schema": "WatchingProgress",
+      "description": "Subcollection of watching progress per user"
+    }
+  }
+}
